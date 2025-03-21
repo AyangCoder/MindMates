@@ -34,3 +34,9 @@ coverage/
 *.swo
 .temp/
 .cache/
+
+# AI Ruler files
+AI Ruler/
+AI Ruler.json
+.AI Ruler/
+AI Ruler.js
