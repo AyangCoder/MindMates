@@ -29,7 +29,7 @@ const models: Model[] = [
 ];
 
 const App: React.FC = () => {
-  const [selectedModel, setSelectedModel] = useState<Model | null>(null);
+  const [selectedModels, setSelectedModels] = useState<Model[]>([]);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -45,9 +45,15 @@ const App: React.FC = () => {
               hoverable
               style={{
                 marginBottom: 16,
-                borderColor: selectedModel?.id === model.id ? '#1890ff' : '#e8e8e8'
+                borderColor: selectedModels.some(m => m.id === model.id) ? '#1890ff' : '#e8e8e8'
               }}
-              onClick={() => setSelectedModel(model)}
+              onClick={() => {
+                setSelectedModels(prev =>
+                  prev.some(m => m.id === model.id)
+                    ? prev.filter(m => m.id !== model.id)
+                    : [...prev, model]
+                );
+              }}
             >
               <Card.Meta
                 avatar={<Avatar icon={<RobotOutlined />} />}
@@ -58,11 +64,16 @@ const App: React.FC = () => {
           ))}
         </Sider>
         <Content style={{ padding: '24px', background: '#fff', margin: '0 24px' }}>
-          {selectedModel ? (
-            <div>开始与 {selectedModel.name} 对话</div>
+          {selectedModels.length > 0 ? (
+            <div>
+              <Title level={4}>已选择的模型：</Title>
+              {selectedModels.map(model => (
+                <div key={model.id}>{model.name}</div>
+              ))}
+            </div>
           ) : (
             <div style={{ textAlign: 'center', marginTop: '20%' }}>
-              <Title level={4}>请先选择一个模型开始对话</Title>
+              <Title level={4}>请选择一个或多个模型开始对话</Title>
             </div>
           )}
         </Content>
