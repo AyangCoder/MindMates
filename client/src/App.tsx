@@ -35,19 +35,17 @@ const App: React.FC = () => {
   return (
     <div className="app-container">
     <Layout>
-      <Header style={{ background: '#fff', padding: '0 24px' }}>        <Title level={3} style={{ margin: '16px 0' }}>MindMates - 思维伙伴</Title>
+      <Header>
+        <Title level={3} style={{ margin: '16px 0', color: '#444', fontWeight: 600 }}>MindMates - 思维伙伴</Title>
       </Header>
       <Layout>
-        <Sider width={300} style={{ background: '#fff', padding: '24px' }}>
-          <Title level={4}>选择模型</Title>
+        <Sider width={300}>
+          <Title level={4} style={{ marginBottom: '20px', color: '#444' }}>选择模型</Title>
           {models.map(model => (
             <Card
               key={model.id}
               hoverable
-              style={{
-                marginBottom: 16,
-                borderColor: selectedModels.some(m => m.id === model.id) ? '#1890ff' : '#e8e8e8'
-              }}
+              className={`model-card ${selectedModels.some(m => m.id === model.id) ? 'selected' : ''}`}
               onClick={() => {
                 setSelectedModels(prev =>
                   prev.some(m => m.id === model.id)
@@ -64,7 +62,7 @@ const App: React.FC = () => {
             </Card>
           ))}
         </Sider>
-        <Content style={{ padding: '24px', background: '#fff', margin: '0 24px', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+        <Content style={{ display: 'flex', flexDirection: 'column' }}>
           {selectedModels.length > 0 ? (
             <Chat selectedModels={selectedModels} />
           ) : (

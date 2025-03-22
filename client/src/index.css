@@ -5,9 +5,34 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: #f5f7fa;
+  color: #333;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* 全局过渡效果 */
+* {
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+/* 全局按钮样式优化 */
+.ant-btn {
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, #1890ff, #6b7ff7);
+  border: none;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.2);
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #40a9ff, #8a96ff);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.3);
+  transform: translateY(-1px);
 }

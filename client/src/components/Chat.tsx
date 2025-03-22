@@ -129,12 +129,7 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'flex-end', 
-        padding: '8px 16px',
-        borderBottom: '1px solid #f0f0f0'
-      }}>
+      <div className="chat-toolbar">
         <Tooltip title="清空聊天记录">
           <Button 
             type="text" 
@@ -144,7 +139,7 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
           />
         </Tooltip>
       </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '20px', minHeight: 0 }} className="chat-messages">
+      <div className="chat-messages-container chat-messages">
         <List
           dataSource={messages}
           renderItem={message => (
@@ -156,34 +151,12 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
                 <Avatar
                   size={36}
                   icon={<RobotOutlined />}
-                  style={{ 
-                    backgroundColor: '#6b7ff7', 
-                    boxShadow: '0 2px 4px rgba(107, 127, 247, 0.2)',
-                    marginRight: '8px',
-                    flexShrink: 0
-                  }}
+                  className="assistant-avatar"
                 />
               )}
-              <div style={{
-                maxWidth: '70%',
-                padding: '12px 16px',
-                borderRadius: message.role === 'user' 
-                  ? '18px 18px 4px 18px' 
-                  : '18px 18px 18px 4px',
-                background: message.role === 'user' ? '#1890ff' : '#f5f5f5',
-                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.08)',
-                color: message.role === 'user' ? '#fff' : '#333',
-                position: 'relative'
-              }}>
+              <div className={message.role === 'user' ? 'user-message-bubble' : 'assistant-message-bubble'}>
                 {message.role === 'assistant' && message.modelName && (
-                  <div style={{ 
-                    position: 'absolute', 
-                    top: '-18px', 
-                    left: '0', 
-                    fontSize: '12px', 
-                    color: '#666',
-                    fontWeight: 500
-                  }}>
+                  <div className="model-name-tag">
                     {message.modelName}
                   </div>
                 )}
@@ -206,12 +179,7 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
                 <Avatar
                   size={36}
                   icon={<UserOutlined />}
-                  style={{ 
-                    backgroundColor: '#1890ff', 
-                    boxShadow: '0 2px 4px rgba(24, 144, 255, 0.2)',
-                    marginLeft: '8px',
-                    flexShrink: 0
-                  }}
+                  className="user-avatar"
                 />
               )}
             </List.Item>
@@ -219,30 +187,15 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
         />
         <div ref={messagesEndRef} />
       </div>
-      <div style={{ 
-        padding: '16px 20px', 
-        borderTop: '1px solid #f0f0f0',
-        background: '#fafafa',
-        borderRadius: '0 0 16px 16px'
-      }}>
-        <div style={{ 
-          display: 'flex', 
-          alignItems: 'flex-end',
-          gap: '12px',
-          position: 'relative'
-        }}>
+      <div className="chat-input-container">
+        <div className="chat-input-wrapper">
           <Input.TextArea
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             placeholder={selectedModels.length > 0 ? "请输入消息..." : "请先选择一个模型开始对话"}
             autoSize={{ minRows: 1, maxRows: 4 }}
-            style={{ 
-              padding: '12px 16px',
-              borderRadius: '18px',
-              resize: 'none',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.06)',
-              flex: 1
-            }}
+            className="chat-input"
+            style={{ flex: 1 }}
             disabled={selectedModels.length === 0}
             onPressEnter={(e) => {
               if (!e.shiftKey) {
@@ -259,10 +212,8 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
               icon={<SendOutlined />}
               onClick={handleSend}
               disabled={!inputValue.trim() || selectedModels.length === 0}
-              style={{ 
-                boxShadow: '0 2px 8px rgba(24, 144, 255, 0.2)',
-                marginBottom: '4px'
-              }}
+              className="send-button"
+              style={{ marginBottom: '4px' }}
             />
           </Tooltip>
         </div>
