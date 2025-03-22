@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Layout, Card, Avatar, Typography } from 'antd';
 import { RobotOutlined } from '@ant-design/icons';
 import './App.css';
+import Chat from './components/Chat';
 
 const { Header, Sider, Content } = Layout;
 const { Title } = Typography;
@@ -32,9 +33,9 @@ const App: React.FC = () => {
   const [selectedModels, setSelectedModels] = useState<Model[]>([]);
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      <Header style={{ background: '#fff', padding: '0 24px' }}>
-        <Title level={3} style={{ margin: '16px 0' }}>MindMates - 思维伙伴</Title>
+    <div className="app-container">
+    <Layout>
+      <Header style={{ background: '#fff', padding: '0 24px' }}>        <Title level={3} style={{ margin: '16px 0' }}>MindMates - 思维伙伴</Title>
       </Header>
       <Layout>
         <Sider width={300} style={{ background: '#fff', padding: '24px' }}>
@@ -63,14 +64,9 @@ const App: React.FC = () => {
             </Card>
           ))}
         </Sider>
-        <Content style={{ padding: '24px', background: '#fff', margin: '0 24px' }}>
+        <Content style={{ padding: '24px', background: '#fff', margin: '0 24px', display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
           {selectedModels.length > 0 ? (
-            <div>
-              <Title level={4}>已选择的模型：</Title>
-              {selectedModels.map(model => (
-                <div key={model.id}>{model.name}</div>
-              ))}
-            </div>
+            <Chat selectedModels={selectedModels} />
           ) : (
             <div style={{ textAlign: 'center', marginTop: '20%' }}>
               <Title level={4}>请选择一个或多个模型开始对话</Title>
@@ -79,6 +75,7 @@ const App: React.FC = () => {
         </Content>
       </Layout>
     </Layout>
+    </div>
   );
 };
 

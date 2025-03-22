@@ -30,23 +30,24 @@ app.get('/health', (req, res) => {
 app.post('/api/chat/completions', async (req, res) => {
   try {
     const { model, messages } = req.body;
-    // TODO: 实现与选定模型的API交互
-    res.json({
-      id: 'chat-' + Date.now(),
-      object: 'chat.completion',
-      created: Math.floor(Date.now() / 1000),
-      model: model,
-      choices: [
-        {
-          index: 0,
-          message: {
-            role: 'assistant',
-            content: '这是一个测试响应'
-          },
-          finish_reason: 'stop'
-        }
-      ]
+    const response = await fetch('https://ark.cn-beijing.volces.com/api/v3/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.ARK_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: model,
+        messages: messages
+      })
     });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
     console.error('Error:', error);
     res.status(500).json({ error: '服务器内部错误' });
