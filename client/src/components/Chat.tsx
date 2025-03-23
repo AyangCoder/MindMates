@@ -188,10 +188,13 @@ const Chat: React.FC<ChatProps> = ({ selectedModels, availableModels, onModelsCh
         modelName: model.name,
         isThinking: true,
         timestamp: Date.now(),
-        status: 'sending'
+        status: 'sending',
+        displayContent: '正在思考...' // 添加displayContent以保持显示区域一致
       };
       setMessages(prev => [...prev, thinkingMessage]);
       try {
+        // 获取当前消息列表，包括之前所有的对话内容
+        const currentMessages = messages.concat(userMessage);
         const response = await fetch('http://localhost:3001/api/chat/completions', {
           method: 'POST',
           headers: {
@@ -200,9 +203,15 @@ const Chat: React.FC<ChatProps> = ({ selectedModels, availableModels, onModelsCh
           body: JSON.stringify({
             model: model.id,
             messages: [
-              { role: 'system', content: '你是人工智能助手.' },
-              ...messages.map(msg => ({ role: msg.role, content: msg.content })),
-              { role: userMessage.role, content: userMessage.content }
+              { 
+                role: 'system', 
+                content: `你是${model.name}，一个人工智能助手。请仔细阅读并理解之前的所有对话内容（包括用户和其他助手的发言），然后自然地参与到对话中。你可以对之前的观点进行补充、讨论或提出新的见解。请确保你的回答与对话上下文保持连贯。` 
+              },
+              ...currentMessages.map(msg => ({
+                role: msg.role,
+                content: msg.content,
+                name: msg.modelName // 添加模型名称以区分不同模型的回复
+              }))
             ]
           })
         });
