@@ -17,19 +17,40 @@ async function isPortInUse(port) {
 }
 
 // 启动服务
+async function stopRunningServices() {
+  try {
+    // 获取所有正在监听的端口
+    const { stdout } = await execAsync('lsof -i -P -n | grep LISTEN');
+    const runningServices = stdout.split('\n')
+      .filter(line => line.includes('node'))
+      .map(line => {
+        const parts = line.split(/\s+/);
+        const port = parts[8].split(':').pop();
+        const pid = parts[1];
+        const cmd = parts[0];
+        return { port, pid, cmd };
+      });
+
+    // 停止所有运行中的服务
+    for (const service of runningServices) {
+      console.log(`发现服务在端口 ${service.port} 运行，正在停止...`);
+      await execAsync(`node stop-service.js ${service.port}`);
+    }
+  } catch (error) {
+    if (!error.message.includes('Command failed')) {
+      console.error('检查运行中的服务时出错:', error);
+    }
+  }
+}
+
 async function startService(type, port) {
   const isBackend = type === 'backend';
   const directory = isBackend ? 'server' : 'client';
   const serviceName = isBackend ? '后端' : '前端';
   
   try {
-    // 检查端口是否被占用
-    const portInUse = await isPortInUse(port);
-    
-    if (portInUse) {
-      console.log(`端口 ${port} 已被占用，${serviceName}服务可能已经在运行。`);
-      return;
-    }
+    // 停止所有运行中的服务
+    await stopRunningServices();
     
     // 启动服务
     console.log(`正在启动${serviceName}服务，端口: ${port}...`);
