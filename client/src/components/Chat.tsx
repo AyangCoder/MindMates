@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Input, Button, List, Avatar, Typography, Tooltip, Dropdown, Space, Menu, Divider, Badge } from 'antd';
+import { Input, Button, List, Avatar, Typography, Tooltip, Dropdown, Space, Menu, Divider, Badge, Select, Tag } from 'antd';
 import { SendOutlined, RobotOutlined, UserOutlined, ClearOutlined, SettingOutlined, ClockCircleOutlined, DownOutlined, SmileOutlined, PaperClipOutlined, CalendarOutlined, EnvironmentOutlined, LinkOutlined, PlusOutlined, MenuFoldOutlined, MenuUnfoldOutlined, SaveOutlined, MessageOutlined, DeleteOutlined } from '@ant-design/icons';
 import './Chat.css';
 import { format, isToday, isYesterday, differenceInDays } from 'date-fns';
@@ -25,6 +25,18 @@ interface ChatProps {
     description: string;
     apiEndpoint: string;
   }>;
+  availableModels: Array<{
+    id: string;
+    name: string;
+    description: string;
+    apiEndpoint: string;
+  }>;
+  onModelsChange: (models: Array<{
+    id: string;
+    name: string;
+    description: string;
+    apiEndpoint: string;
+  }>) => void;
 }
 
 interface Conversation {
@@ -35,7 +47,7 @@ interface Conversation {
   modelIds: string[];
 }
 
-const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
+const Chat: React.FC<ChatProps> = ({ selectedModels, availableModels, onModelsChange }) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [typingSpeed] = useState(30);
@@ -329,10 +341,10 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
 
   return (
     <div className="chat-container">
-      {/* 左侧历史对话列表 */}
+      {/* 左侧功能区 */}
       <div className={`chat-sidebar ${showSidebar ? 'visible' : 'hidden'}`}>
         <div className="sidebar-header">
-          <Typography.Title level={4} className="sidebar-title">历史对话</Typography.Title>
+          <Typography.Title level={4} className="sidebar-title">功能区</Typography.Title>
           <Button 
             type="text" 
             icon={<PlusOutlined />} 
@@ -341,65 +353,102 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
           />
         </div>
         
-        <div className="conversation-list">
-          {conversations.length === 0 ? (
-            <div className="empty-conversations">
-              <p>暂无历史对话</p>
-              <p>开始新对话并保存，即可在此查看</p>
-            </div>
-          ) : (
-            conversations.map(conversation => (
-              <div 
-                key={conversation.id}
-                className={`conversation-item ${currentConversationId === conversation.id ? 'active' : ''}`}
-                onClick={() => loadConversation(conversation.id)}
-              >
-                <Avatar 
-                  size={48} 
-                  icon={<MessageOutlined />}
-                  className="conversation-avatar"
-                />
-                <div className="conversation-info">
-                  <div className="conversation-header">
-                    <span className="conversation-name">{conversation.name}</span>
-                    <span className="conversation-time">{formatMessageTime(conversation.timestamp)}</span>
+        {/* 模型选择区域 */}
+        <div className="sidebar-section model-selection-section">
+          <Typography.Title level={5} className="sidebar-subtitle">选择模型</Typography.Title>
+          <div className="model-selection-container">
+            <Select
+              mode="multiple"
+              style={{ width: '100%' }}
+              placeholder="请选择一个或多个模型"
+              value={selectedModels.map(model => model.id)}
+              onChange={(values) => {
+                const selected = availableModels.filter(model => values.includes(model.id));
+                onModelsChange(selected);
+              }}
+              optionLabelProp="label"
+              className="model-select"
+            >
+              {availableModels.map(model => (
+                <Select.Option key={model.id} value={model.id} label={model.name}>
+                  <div className="model-option">
+                    <Avatar size="small" icon={<RobotOutlined />} className="model-option-avatar" />
+                    <div className="model-option-info">
+                      <div className="model-option-name">{model.name}</div>
+                      <div className="model-option-desc">{model.description}</div>
+                    </div>
                   </div>
-                  <div className="conversation-message">
-                    {conversation.messages.length > 0 
-                      ? conversation.messages[conversation.messages.length - 1].content.substring(0, 30) + (conversation.messages[conversation.messages.length - 1].content.length > 30 ? '...' : '')
-                      : '空对话'}
-                  </div>
-                </div>
-                <Button 
-                  type="text" 
-                  size="small" 
-                  className="delete-conversation-btn"
-                  icon={<DeleteOutlined />} 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteConversation(conversation.id);
-                  }}
-                />
+                </Select.Option>
+              ))}
+            </Select>
+            
+            {selectedModels.length > 0 && (
+              <div className="selected-models-list">
+                {selectedModels.map(model => (
+                  <Tag 
+                    key={model.id} 
+                    className="selected-model-tag"
+                    closable
+                    onClose={() => {
+                      onModelsChange(selectedModels.filter(m => m.id !== model.id));
+                    }}
+                    icon={<RobotOutlined />}
+                  >
+                    {model.name}
+                  </Tag>
+                ))}
               </div>
-            ))
-          )}
+            )}
+          </div>
         </div>
         
         <Divider style={{ margin: '12px 0' }} />
         
+        {/* 历史对话列表 */}
         <div className="sidebar-section">
-          <Typography.Title level={5} className="sidebar-subtitle">已选择模型</Typography.Title>
-          <div className="selected-models-list">
-            {selectedModels.map(model => (
-              <div key={model.id} className="selected-model-item">
-                <Avatar 
-                  size={32} 
-                  icon={<RobotOutlined />}
-                  className="model-avatar"
-                />
-                <span className="model-name">{model.name}</span>
+          <Typography.Title level={5} className="sidebar-subtitle">历史对话</Typography.Title>
+          <div className="conversation-list">
+            {conversations.length === 0 ? (
+              <div className="empty-conversations">
+                <p>暂无历史对话</p>
+                <p>开始新对话并保存，即可在此查看</p>
               </div>
-            ))}
+            ) : (
+              conversations.map(conversation => (
+                <div 
+                  key={conversation.id}
+                  className={`conversation-item ${currentConversationId === conversation.id ? 'active' : ''}`}
+                  onClick={() => loadConversation(conversation.id)}
+                >
+                  <Avatar 
+                    size={40} 
+                    icon={<MessageOutlined />}
+                    className="conversation-avatar"
+                  />
+                  <div className="conversation-info">
+                    <div className="conversation-header">
+                      <span className="conversation-name">{conversation.name}</span>
+                      <span className="conversation-time">{formatMessageTime(conversation.timestamp)}</span>
+                    </div>
+                    <div className="conversation-message">
+                      {conversation.messages.length > 0 
+                        ? conversation.messages[conversation.messages.length - 1].content.substring(0, 30) + (conversation.messages[conversation.messages.length - 1].content.length > 30 ? '...' : '')
+                        : '空对话'}
+                    </div>
+                  </div>
+                  <Button 
+                    type="text" 
+                    size="small" 
+                    className="delete-conversation-btn"
+                    icon={<DeleteOutlined />} 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      deleteConversation(conversation.id);
+                    }}
+                  />
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>
@@ -460,10 +509,15 @@ const Chat: React.FC<ChatProps> = ({ selectedModels }) => {
         
         {/* 聊天消息区域 */}
         <div className="chat-messages-container">
-          {messages.length === 0 ? (
+          {selectedModels.length === 0 ? (
             <div className="empty-chat-placeholder">
               <RobotOutlined className="empty-chat-icon" />
-              <p className="empty-chat-text">选择模型并开始对话吧！</p>
+              <p className="empty-chat-text">请在左侧功能区选择一个或多个模型开始对话</p>
+            </div>
+          ) : messages.length === 0 ? (
+            <div className="empty-chat-placeholder">
+              <RobotOutlined className="empty-chat-icon" />
+              <p className="empty-chat-text">开始新的对话吧！</p>
             </div>
           ) : (
             messages.map(message => (

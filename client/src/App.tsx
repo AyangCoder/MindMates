@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Layout, Card, Avatar, Typography } from 'antd';
-import { RobotOutlined } from '@ant-design/icons';
+import { Layout, Typography } from 'antd';
 import './App.css';
 import Chat from './components/Chat';
 
@@ -39,37 +38,12 @@ const App: React.FC = () => {
         <Title level={3} style={{ margin: '16px 0', color: '#444', fontWeight: 600 }}>MindMates - 思维伙伴</Title>
       </Header>
       <Layout>
-        <Sider width={300}>
-          <Title level={4} style={{ marginBottom: '20px', color: '#444' }}>选择模型</Title>
-          {models.map(model => (
-            <Card
-              key={model.id}
-              hoverable
-              className={`model-card ${selectedModels.some(m => m.id === model.id) ? 'selected' : ''}`}
-              onClick={() => {
-                setSelectedModels(prev =>
-                  prev.some(m => m.id === model.id)
-                    ? prev.filter(m => m.id !== model.id)
-                    : [...prev, model]
-                );
-              }}
-            >
-              <Card.Meta
-                avatar={<Avatar icon={<RobotOutlined />} />}
-                title={model.name}
-                description={model.description}
-              />
-            </Card>
-          ))}
-        </Sider>
         <Content style={{ display: 'flex', flexDirection: 'column' }}>
-          {selectedModels.length > 0 ? (
-            <Chat selectedModels={selectedModels} />
-          ) : (
-            <div style={{ textAlign: 'center', marginTop: '20%' }}>
-              <Title level={4}>请选择一个或多个模型开始对话</Title>
-            </div>
-          )}
+          <Chat 
+            selectedModels={selectedModels} 
+            availableModels={models} 
+            onModelsChange={setSelectedModels} 
+          />
         </Content>
       </Layout>
     </Layout>
